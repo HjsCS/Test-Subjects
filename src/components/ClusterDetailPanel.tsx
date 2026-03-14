@@ -99,7 +99,7 @@ export default function ClusterDetailPanel({
 
       {/* Panel — highest z-index, fixed 50vh height */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-[9999] h-[50vh] flex flex-col rounded-t-[24px] bg-white shadow-[0px_-10px_40px_rgba(0,0,0,0.12)] animate-slide-up"
+        className="fixed bottom-0 left-0 right-0 z-[9999] h-[80vh] flex flex-col rounded-t-[24px] bg-white shadow-[0px_-10px_40px_rgba(0,0,0,0.12)] animate-slide-up"
         onTouchMove={stopPropagation}
         onTouchStart={stopPropagation}
         onMouseDown={stopPropagation}

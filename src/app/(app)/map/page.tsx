@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { Clock, Eye, LocateFixed, Search } from "lucide-react";
+import { Clock, Eye, LocateFixed, Search, X } from "lucide-react";
 import AddMoodModal from "@/components/AddMoodModal";
 import ClusterDetailPanel from "@/components/ClusterDetailPanel";
 import MoodDetailCard from "@/components/MoodDetailCard";
@@ -582,80 +582,99 @@ function MapPageContent() {
 
       {/* Global Search Panel */}
       {globalSearchOpen && (
-        <div className="absolute top-[100px] right-4 z-30 w-[300px] max-h-[60vh] flex flex-col bg-white/95 backdrop-blur-md rounded-[20px] shadow-[0px_8px_30px_rgba(0,0,0,0.15)] overflow-hidden">
-          {/* Search input */}
-          <div className="p-3 shrink-0">
-            <div className="relative">
-              <Search
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#99a1af]"
-              />
-              <input
-                type="text"
-                value={globalSearchQuery}
-                onChange={(e) => setGlobalSearchQuery(e.target.value)}
-                placeholder={`Search ${accessFilter === "friends" ? "friend" : accessFilter === "private" ? "my" : "all"} moods...`}
-                className="w-full h-[36px] pl-9 pr-3 rounded-[12px] bg-[#f3f4f6] text-[13px] text-[#364153] placeholder-[#99a1af] outline-none focus:ring-2 focus:ring-[#b8e6d5]"
-                autoFocus
-              />
+        <>
+          {/* Backdrop to close */}
+          <div
+            className="fixed inset-0 z-[29]"
+            onClick={() => setGlobalSearchOpen(false)}
+          />
+          <div
+            className="fixed left-1/2 -translate-x-1/2 z-30 w-[90%] max-w-[400px] flex flex-col bg-white/95 backdrop-blur-md rounded-[20px] shadow-[0px_8px_30px_rgba(0,0,0,0.15)] overflow-hidden"
+            style={{ top: "100px", maxHeight: "calc(100dvh - 220px)" }}
+          >
+            {/* Search input + close */}
+            <div className="flex items-center gap-2 p-3 shrink-0">
+              <div className="relative flex-1">
+                <Search
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#99a1af]"
+                />
+                <input
+                  type="text"
+                  value={globalSearchQuery}
+                  onChange={(e) => setGlobalSearchQuery(e.target.value)}
+                  placeholder={`Search ${accessFilter === "friends" ? "friend" : accessFilter === "private" ? "my" : "all"} moods...`}
+                  className="w-full h-[36px] pl-9 pr-3 rounded-[12px] bg-[#f3f4f6] text-[13px] text-[#364153] placeholder-[#99a1af] outline-none focus:ring-2 focus:ring-[#b8e6d5]"
+                  autoFocus
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setGlobalSearchOpen(false)}
+                className="w-[36px] h-[36px] rounded-full bg-[#f3f4f6] flex items-center justify-center shrink-0 hover:bg-[#e5e7eb] transition-colors"
+              >
+                <X size={16} className="text-[#6a7282]" />
+              </button>
+            </div>
+
+            {/* Results */}
+            <div className="flex-1 overflow-y-auto px-2 pb-2">
+              {globalSearchQuery.trim() === "" ? (
+                <p className="text-center text-[12px] text-[#99a1af] py-4">
+                  Type to search...
+                </p>
+              ) : globalSearchResults.length === 0 ? (
+                <p className="text-center text-[12px] text-[#99a1af] py-4">
+                  No results found
+                </p>
+              ) : (
+                <div className="flex flex-col gap-1">
+                  {globalSearchResults.slice(0, 20).map((entry) => {
+                    const cat = EMOTION_CATEGORIES[entry.category];
+                    const dotColor = getEmotionBubbleBorder(
+                      entry.emotion_score,
+                    );
+                    return (
+                      <button
+                        key={entry.id}
+                        type="button"
+                        onClick={async () => {
+                          setGlobalSearchOpen(false);
+                          setSelectedEntry(entry);
+                          setEntryAlreadyLocated(true);
+                          setFlyTo({
+                            lat: entry.latitude,
+                            lng: entry.longitude,
+                          });
+                          setSelectedEntryLocationName(null);
+                          const name = await reverseGeocode(
+                            entry.latitude,
+                            entry.longitude,
+                          );
+                          setSelectedEntryLocationName(name);
+                        }}
+                        className="flex items-center gap-2 p-2 rounded-[12px] hover:bg-[#f3f4f6] transition-colors text-left"
+                      >
+                        <div
+                          className="w-3 h-3 rounded-full shrink-0"
+                          style={{ backgroundColor: dotColor }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[12px] font-medium text-[#364153] truncate">
+                            {entry.note || cat.label}
+                          </p>
+                          <p className="text-[10px] text-[#99a1af]">
+                            {cat.emoji} {cat.label}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Results */}
-          <div className="flex-1 overflow-y-auto px-2 pb-2">
-            {globalSearchQuery.trim() === "" ? (
-              <p className="text-center text-[12px] text-[#99a1af] py-4">
-                Type to search...
-              </p>
-            ) : globalSearchResults.length === 0 ? (
-              <p className="text-center text-[12px] text-[#99a1af] py-4">
-                No results found
-              </p>
-            ) : (
-              <div className="flex flex-col gap-1">
-                {globalSearchResults.slice(0, 20).map((entry) => {
-                  const cat = EMOTION_CATEGORIES[entry.category];
-                  const dotColor = getEmotionBubbleBorder(entry.emotion_score);
-                  return (
-                    <button
-                      key={entry.id}
-                      type="button"
-                      onClick={async () => {
-                        setGlobalSearchOpen(false);
-                        setSelectedEntry(entry);
-                        setEntryAlreadyLocated(true);
-                        setFlyTo({
-                          lat: entry.latitude,
-                          lng: entry.longitude,
-                        });
-                        setSelectedEntryLocationName(null);
-                        const name = await reverseGeocode(
-                          entry.latitude,
-                          entry.longitude,
-                        );
-                        setSelectedEntryLocationName(name);
-                      }}
-                      className="flex items-center gap-2 p-2 rounded-[12px] hover:bg-[#f3f4f6] transition-colors text-left"
-                    >
-                      <div
-                        className="w-3 h-3 rounded-full shrink-0"
-                        style={{ backgroundColor: dotColor }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-medium text-[#364153] truncate">
-                          {entry.note || cat.label}
-                        </p>
-                        <p className="text-[10px] text-[#99a1af]">
-                          {cat.emoji} {cat.label}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
+        </>
       )}
 
       {/* "Tap to drop a pin" banner when picking location */}

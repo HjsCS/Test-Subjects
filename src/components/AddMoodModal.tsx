@@ -345,9 +345,9 @@ export default function AddMoodModal({
 
           {/* Labels */}
           <div className="flex items-center justify-between">
-            <span className="text-[12px] text-[#3B82F6]">💩 Low</span>
-            <span className="text-[12px] text-[#EAB308]">🙂 Neutral</span>
-            <span className="text-[12px] text-[#EF4444]">🌈 High</span>
+            <span className="text-[12px] text-[#94A3B8]">💩 Low</span>
+            <span className="text-[12px] text-[#E8C87A]">🙂 Neutral</span>
+            <span className="text-[12px] text-[#D4849A]">🌈 High</span>
           </div>
         </div>
 

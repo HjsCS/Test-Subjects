@@ -1,18 +1,24 @@
 /**
- * Continuous emotion color system.
+ * Continuous emotion color system — soft, flat, Morandi-inspired palette.
  *
- * Score 0-100 maps to a smooth gradient:
- *   0   → Blue   rgb(59, 130, 246)   — low / sad
- *   50  → Yellow rgb(234, 179, 8)    — neutral
- *   100 → Red    rgb(239, 68, 68)    — high / excited
+ * Score 0-100 maps through 5 color stops:
+ *   0   → Morandi Blue  #94A3B8  (subdued, calm)
+ *   25  → Mint Green    #86CFAC  (soothing)
+ *   50  → Warm Apricot  #E8C87A  (neutral, warm)
+ *   75  → Soft Coral    #E8A87A  (warm)
+ *   100 → Rose Pink     #D4849A  (intense but gentle)
  */
 
 /** RGB tuple */
 type RGB = [number, number, number];
 
-const BLUE: RGB = [59, 130, 246];
-const YELLOW: RGB = [234, 179, 8];
-const RED: RGB = [239, 68, 68];
+const STOPS: { at: number; color: RGB }[] = [
+  { at: 0, color: [148, 163, 184] }, // #94A3B8 Morandi Blue
+  { at: 25, color: [134, 207, 172] }, // #86CFAC Mint Green
+  { at: 50, color: [232, 200, 122] }, // #E8C87A Warm Apricot
+  { at: 75, color: [232, 168, 122] }, // #E8A87A Soft Coral
+  { at: 100, color: [212, 132, 154] }, // #D4849A Rose Pink
+];
 
 /** Linearly interpolate between two RGB colors */
 function lerp(a: RGB, b: RGB, t: number): RGB {
@@ -23,13 +29,20 @@ function lerp(a: RGB, b: RGB, t: number): RGB {
   ];
 }
 
-/** Core: score (0-100) → RGB tuple */
+/** Core: score (0-100) → RGB tuple via multi-stop gradient */
 function scoreToRgb(score: number): RGB {
   const s = Math.max(0, Math.min(100, score));
-  if (s <= 50) {
-    return lerp(BLUE, YELLOW, s / 50);
+
+  // Find the two surrounding stops
+  for (let i = 0; i < STOPS.length - 1; i++) {
+    const curr = STOPS[i];
+    const next = STOPS[i + 1];
+    if (s <= next.at) {
+      const t = (s - curr.at) / (next.at - curr.at);
+      return lerp(curr.color, next.color, t);
+    }
   }
-  return lerp(YELLOW, RED, (s - 50) / 50);
+  return STOPS[STOPS.length - 1].color;
 }
 
 /** Convert RGB tuple to hex string */
@@ -44,14 +57,13 @@ export function getEmotionColor(score: number): string {
   return rgbToHex(scoreToRgb(score));
 }
 
-/** Darker accent color for borders / text — same hue, higher saturation */
+/** Darker accent color for borders / text */
 export function getEmotionAccentColor(score: number): string {
   const [r, g, b] = scoreToRgb(score);
-  // Darken by 25%
   return rgbToHex([
-    Math.round(r * 0.75),
-    Math.round(g * 0.75),
-    Math.round(b * 0.75),
+    Math.round(r * 0.7),
+    Math.round(g * 0.7),
+    Math.round(b * 0.7),
   ]);
 }
 
@@ -61,7 +73,7 @@ export function getEmotionBubbleBg(score: number): string {
   return `rgba(${r},${g},${b},0.35)`;
 }
 
-/** Border color for map bubbles — slightly lighter */
+/** Border color for map bubbles */
 export function getEmotionBubbleBorder(score: number): string {
   const [r, g, b] = scoreToRgb(score);
   return `rgba(${r},${g},${b},0.6)`;
@@ -76,7 +88,7 @@ export function getEmotionLabel(score: number): string {
   return "Very High";
 }
 
-/** CSS gradient string for the slider track (blue → yellow → red) */
+/** CSS gradient string for the slider track */
 export function getSliderGradient(): string {
-  return `linear-gradient(90deg, ${rgbToHex(BLUE)} 0%, ${rgbToHex(YELLOW)} 50%, ${rgbToHex(RED)} 100%)`;
+  return `linear-gradient(90deg, ${STOPS.map((s) => `${rgbToHex(s.color)} ${s.at}%`).join(", ")})`;
 }

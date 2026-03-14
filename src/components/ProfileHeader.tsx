@@ -38,6 +38,7 @@ export default function ProfileHeader({
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [friendIds, setFriendIds] = useState<Set<string>>(new Set());
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+  const [incomingRequestCount, setIncomingRequestCount] = useState(0);
 
   // Close settings on outside click
   useEffect(() => {
@@ -73,6 +74,8 @@ export default function ProfileHeader({
         }
         if (requestsRes.ok) {
           const data = await requestsRes.json();
+          const incomingArr = data.incoming ?? [];
+          setIncomingRequestCount(incomingArr.length);
           setPendingIds(
             new Set(
               [
@@ -175,11 +178,16 @@ export default function ProfileHeader({
             <button
               type="button"
               onClick={() => router.push("/friends")}
-              className="bg-[#e8d4f8] text-[#9b72c0] text-[11px] px-[11px] py-[5px] rounded-full flex items-center gap-1 hover:bg-[#ddc3f0] transition-colors"
+              className="bg-[#e8d4f8] text-[#9b72c0] text-[11px] px-[11px] py-[5px] rounded-full flex items-center gap-1 hover:bg-[#ddc3f0] transition-colors relative"
             >
               <Users size={11} />
               {friendCount} Friends
               <ChevronRight size={11} />
+              {incomingRequestCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-[16px] h-[16px] rounded-full bg-[#EF4444] text-white text-[9px] font-bold flex items-center justify-center shadow-[0_0_0_2px_white]">
+                  {incomingRequestCount}
+                </span>
+              )}
             </button>
           </div>
         </div>

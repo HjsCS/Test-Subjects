@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Search, Users, Bell } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, Users, Bell, ArrowLeft } from "lucide-react";
 import FriendCard from "@/components/FriendCard";
 import type { FriendshipWithProfile, Profile } from "@/types/database";
 
 type Tab = "friends" | "requests";
 
 export default function FriendsPage() {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("friends");
   const [friends, setFriends] = useState<FriendshipWithProfile[]>([]);
   const [incoming, setIncoming] = useState<FriendshipWithProfile[]>([]);
@@ -173,8 +175,17 @@ export default function FriendsPage() {
   return (
     <div className="bg-[#fefbf6] min-h-screen pb-[120px]">
       {/* Header */}
-      <div className="flex items-center justify-center px-5 pt-[50px] pb-4">
+      <div className="flex items-center justify-between px-5 pt-[max(env(safe-area-inset-top,12px),12px)] pb-4">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="w-[40px] h-[40px] flex items-center justify-center"
+          aria-label="Go back"
+        >
+          <ArrowLeft size={24} className="text-[#364153]" />
+        </button>
         <span className="text-[16px] font-medium text-[#101828]">Friends</span>
+        <div className="w-[40px]" />
       </div>
 
       {/* Search bar */}

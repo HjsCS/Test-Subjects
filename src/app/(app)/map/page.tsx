@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { Clock, Eye, LocateFixed } from "lucide-react";
+import { Clock, Eye, LocateFixed, Search } from "lucide-react";
 import AddMoodModal from "@/components/AddMoodModal";
 import ClusterDetailPanel from "@/components/ClusterDetailPanel";
 import MoodDetailCard from "@/components/MoodDetailCard";
@@ -20,6 +20,8 @@ import MemoryReminderBanner from "@/components/MemoryReminderBanner";
 import { useMemoryReminders } from "@/hooks/useMemoryReminders";
 import { getCurrentPosition, watchPosition } from "@/utils/geolocation";
 import { reverseGeocode } from "@/utils/geocoding";
+import { EMOTION_CATEGORIES } from "@/utils/categories";
+import { getEmotionBubbleBorder } from "@/utils/emotion-color";
 
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 import type {
@@ -76,6 +78,8 @@ function MapPageContent() {
   const [accessFilter, setAccessFilter] = useState<AccessFilter>("all");
   const [showTimeDropdown, setShowTimeDropdown] = useState(false);
   const [showAccessDropdown, setShowAccessDropdown] = useState(false);
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
+  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
 
   // Refs for click-outside
   const timeRef = useRef<HTMLDivElement>(null);
@@ -239,6 +243,19 @@ function MapPageContent() {
 
     return result;
   }, [entries, timeFilter, accessFilter]);
+
+  // Global search results (filtered from filteredEntries)
+  const globalSearchResults = useMemo(() => {
+    if (!globalSearchQuery.trim()) return [];
+    const q = globalSearchQuery.trim().toLowerCase();
+    return filteredEntries.filter((e) => {
+      const note = (e.note ?? "").toLowerCase();
+      const catLabel =
+        EMOTION_CATEGORIES[e.category]?.label.toLowerCase() ?? "";
+      const author = e.profiles?.display_name?.toLowerCase() ?? "";
+      return note.includes(q) || catLabel.includes(q) || author.includes(q);
+    });
+  }, [filteredEntries, globalSearchQuery]);
 
   // Handle map click — only responds when in "pick on map" mode
   const handleMapClick = useCallback(
@@ -523,6 +540,24 @@ function MapPageContent() {
           )}
         </div>
 
+        {/* Search Button */}
+        <button
+          type="button"
+          onClick={() => {
+            setGlobalSearchOpen(!globalSearchOpen);
+            setGlobalSearchQuery("");
+          }}
+          className={`flex items-center justify-center w-[64px] h-[64px] rounded-[20px] shadow-[0px_20px_25px_0px_rgba(0,0,0,0.1),0px_8px_10px_0px_rgba(0,0,0,0.1)] transition-all hover:scale-105 ${
+            globalSearchOpen ? "bg-[#364153]" : "bg-white"
+          }`}
+          aria-label="Search moods"
+        >
+          <Search
+            size={24}
+            className={globalSearchOpen ? "text-white" : "text-[#6a7282]"}
+          />
+        </button>
+
         {/* Locate Me Button */}
         <button
           type="button"
@@ -544,6 +579,84 @@ function MapPageContent() {
           <LocateFixed size={24} className="text-[#4285F4]" />
         </button>
       </div>
+
+      {/* Global Search Panel */}
+      {globalSearchOpen && (
+        <div className="absolute top-[100px] right-4 z-30 w-[300px] max-h-[60vh] flex flex-col bg-white/95 backdrop-blur-md rounded-[20px] shadow-[0px_8px_30px_rgba(0,0,0,0.15)] overflow-hidden">
+          {/* Search input */}
+          <div className="p-3 shrink-0">
+            <div className="relative">
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#99a1af]"
+              />
+              <input
+                type="text"
+                value={globalSearchQuery}
+                onChange={(e) => setGlobalSearchQuery(e.target.value)}
+                placeholder={`Search ${accessFilter === "friends" ? "friend" : accessFilter === "private" ? "my" : "all"} moods...`}
+                className="w-full h-[36px] pl-9 pr-3 rounded-[12px] bg-[#f3f4f6] text-[13px] text-[#364153] placeholder-[#99a1af] outline-none focus:ring-2 focus:ring-[#b8e6d5]"
+                autoFocus
+              />
+            </div>
+          </div>
+
+          {/* Results */}
+          <div className="flex-1 overflow-y-auto px-2 pb-2">
+            {globalSearchQuery.trim() === "" ? (
+              <p className="text-center text-[12px] text-[#99a1af] py-4">
+                Type to search...
+              </p>
+            ) : globalSearchResults.length === 0 ? (
+              <p className="text-center text-[12px] text-[#99a1af] py-4">
+                No results found
+              </p>
+            ) : (
+              <div className="flex flex-col gap-1">
+                {globalSearchResults.slice(0, 20).map((entry) => {
+                  const cat = EMOTION_CATEGORIES[entry.category];
+                  const dotColor = getEmotionBubbleBorder(entry.emotion_score);
+                  return (
+                    <button
+                      key={entry.id}
+                      type="button"
+                      onClick={async () => {
+                        setGlobalSearchOpen(false);
+                        setSelectedEntry(entry);
+                        setEntryAlreadyLocated(true);
+                        setFlyTo({
+                          lat: entry.latitude,
+                          lng: entry.longitude,
+                        });
+                        setSelectedEntryLocationName(null);
+                        const name = await reverseGeocode(
+                          entry.latitude,
+                          entry.longitude,
+                        );
+                        setSelectedEntryLocationName(name);
+                      }}
+                      className="flex items-center gap-2 p-2 rounded-[12px] hover:bg-[#f3f4f6] transition-colors text-left"
+                    >
+                      <div
+                        className="w-3 h-3 rounded-full shrink-0"
+                        style={{ backgroundColor: dotColor }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-medium text-[#364153] truncate">
+                          {entry.note || cat.label}
+                        </p>
+                        <p className="text-[10px] text-[#99a1af]">
+                          {cat.emoji} {cat.label}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* "Tap to drop a pin" banner when picking location */}
       {pickingOnMap && (
@@ -638,6 +751,11 @@ function MapPageContent() {
             setSelectedEntry((prev) =>
               prev && prev.id === updated.id ? { ...prev, ...updated } : prev,
             );
+          }}
+          onDelete={(moodId) => {
+            setEntries((prev) => prev.filter((e) => e.id !== moodId));
+            setSelectedEntry(null);
+            setDetailModalOpen(false);
           }}
         />
       )}

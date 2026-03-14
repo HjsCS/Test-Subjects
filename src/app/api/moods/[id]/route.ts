@@ -107,28 +107,34 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json(data);
     }
 
-    // ─── Mode 2: Content edit (owner only, 10-minute window) ───
+    // ─── Mode 2: Content edit (owner only) ───
     delete body.user_id;
     delete body.created_at;
     delete body.reactions;
 
-    const { data: existing } = await supabase
-      .from("mood_entries")
-      .select("created_at")
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .single();
+    // Visibility-only changes are always allowed; other edits have 10-min window
+    const isVisibilityOnly =
+      Object.keys(body).length === 1 && "visibility" in body;
 
-    if (!existing) {
-      return NextResponse.json({ error: "Entry not found" }, { status: 404 });
-    }
+    if (!isVisibilityOnly) {
+      const { data: existing } = await supabase
+        .from("mood_entries")
+        .select("created_at")
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .single();
 
-    const ageMs = Date.now() - new Date(existing.created_at).getTime();
-    if (ageMs > 10 * 60 * 1000) {
-      return NextResponse.json(
-        { error: "Can only edit entries within 10 minutes of creation" },
-        { status: 403 },
-      );
+      if (!existing) {
+        return NextResponse.json({ error: "Entry not found" }, { status: 404 });
+      }
+
+      const ageMs = Date.now() - new Date(existing.created_at).getTime();
+      if (ageMs > 10 * 60 * 1000) {
+        return NextResponse.json(
+          { error: "Can only edit entries within 10 minutes of creation" },
+          { status: 403 },
+        );
+      }
     }
 
     const { data, error } = await supabase

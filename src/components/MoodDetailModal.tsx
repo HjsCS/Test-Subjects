@@ -1,7 +1,18 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { X, MapPin, Clock, Eye, Pencil, Check, Loader2 } from "lucide-react";
+import {
+  X,
+  MapPin,
+  Clock,
+  Eye,
+  Pencil,
+  Check,
+  Loader2,
+  Trash2,
+  Lock,
+  Users,
+} from "lucide-react";
 import type {
   MoodEntry,
   MoodEntryWithAuthor,
@@ -32,6 +43,8 @@ interface MoodDetailModalProps {
     moodId: string,
     reactions: { user_id: string; emoji: string }[],
   ) => void;
+  /** Called when user deletes this entry */
+  onDelete?: (moodId: string) => void;
 }
 
 function formatDate(dateStr: string): string {
@@ -78,6 +91,7 @@ export default function MoodDetailModal({
   locationName,
   onEntryUpdated,
   onReactionsUpdate,
+  onDelete,
 }: MoodDetailModalProps) {
   const cat = EMOTION_CATEGORIES[entry.category];
   const dotColor = getEmotionBubbleBorder(entry.emotion_score);
@@ -91,6 +105,9 @@ export default function MoodDetailModal({
   const [editNote, setEditNote] = useState(entry.note ?? "");
   const [editCategory, setEditCategory] = useState(entry.category);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [togglingVis, setTogglingVis] = useState(false);
 
   const stopPropagation = useCallback(
     (e: React.TouchEvent | React.MouseEvent) => {
@@ -127,6 +144,42 @@ export default function MoodDetailModal({
       // silent
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/moods/${entry.id}`, { method: "DELETE" });
+      if (res.ok) {
+        onDelete?.(entry.id);
+        setConfirmDelete(false);
+        onClose();
+      }
+    } catch {
+      // silent
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  async function toggleVisibility() {
+    setTogglingVis(true);
+    const newVis = entry.visibility === "private" ? "friends" : "private";
+    try {
+      const res = await fetch(`/api/moods/${entry.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visibility: newVis }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        onEntryUpdated?.(updated);
+      }
+    } catch {
+      // silent
+    } finally {
+      setTogglingVis(false);
     }
   }
 
@@ -348,6 +401,33 @@ export default function MoodDetailModal({
             </div>
           </div>
 
+          {/* Own entry actions: toggle visibility + delete */}
+          {isOwn && !editing && (
+            <div className="flex gap-2 mb-5">
+              <button
+                onClick={toggleVisibility}
+                disabled={togglingVis}
+                className="flex-1 flex items-center justify-center gap-2 h-[40px] rounded-[14px] bg-[#f3f4f6] text-[13px] font-medium text-[#364153] hover:bg-[#e5e7eb] transition-colors disabled:opacity-50"
+              >
+                {entry.visibility === "private" ? (
+                  <>
+                    <Users size={14} /> Share with Friends
+                  </>
+                ) : (
+                  <>
+                    <Lock size={14} /> Make Private
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="flex items-center justify-center gap-1.5 px-4 h-[40px] rounded-[14px] bg-[#fef2f2] text-[13px] font-medium text-[#dc2626] hover:bg-[#fee2e2] transition-colors"
+              >
+                <Trash2 size={14} /> Delete
+              </button>
+            </div>
+          )}
+
           {/* Reaction bar — for all moods */}
           <div className="mb-5">
             <ReactionBar
@@ -370,6 +450,41 @@ export default function MoodDetailModal({
           )}
         </div>
       </div>
+
+      {/* Delete confirmation dialog */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/40 px-6">
+          <div className="bg-white rounded-[24px] shadow-[0px_20px_25px_rgba(0,0,0,0.15)] p-6 w-full max-w-[320px]">
+            <h3 className="text-[16px] font-semibold text-[#101828] mb-2">
+              Delete this mood?
+            </h3>
+            <p className="text-[13px] text-[#6a7282] mb-5">
+              This action cannot be undone. Your mood entry and all its
+              reactions will be permanently removed.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="flex-1 h-[44px] rounded-[12px] bg-[#f3f4f6] text-[14px] font-medium text-[#6a7282] hover:bg-[#e5e7eb] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 h-[44px] rounded-[12px] bg-[#dc2626] text-[14px] font-medium text-white hover:bg-[#b91c1c] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {deleting ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Trash2 size={16} />
+                )}
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         @keyframes slide-up {

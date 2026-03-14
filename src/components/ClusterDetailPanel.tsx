@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { X, ChevronLeft, Clock, MapPin, Eye, ArrowDownUp } from "lucide-react";
+import {
+  X,
+  ChevronLeft,
+  Clock,
+  MapPin,
+  Eye,
+  ArrowDownUp,
+  Search,
+} from "lucide-react";
 import type { MapEntry } from "@/components/MapView";
 import type { EmotionCategory } from "@/types/database";
 import { EMOTION_CATEGORIES } from "@/utils/categories";
@@ -66,6 +74,7 @@ export default function ClusterDetailPanel({
   );
   const [selectedEntry, setSelectedEntry] = useState<MapEntry | null>(null);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Get unique categories present in the cluster
   const availableCategories = useMemo(() => {
@@ -74,25 +83,37 @@ export default function ClusterDetailPanel({
     return Array.from(cats);
   }, [entries]);
 
-  // Filter entries by selected category, then sort
+  // Filter entries by category + search, then sort
   const filteredEntries = useMemo(() => {
     let result =
       activeFilter === "all"
         ? [...entries]
         : entries.filter((e) => e.category === activeFilter);
 
+    // Fuzzy search on note, category label, author name
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      result = result.filter((e) => {
+        const note = (e.note ?? "").toLowerCase();
+        const catLabel =
+          EMOTION_CATEGORIES[e.category]?.label.toLowerCase() ?? "";
+        const author = e.profiles?.display_name?.toLowerCase() ?? "";
+        return note.includes(q) || catLabel.includes(q) || author.includes(q);
+      });
+    }
+
     // Sort: notifications first, then by time
     result.sort((a, b) => {
       const aNotif = notificationIds?.has(a.id) ? 1 : 0;
       const bNotif = notificationIds?.has(b.id) ? 1 : 0;
-      if (aNotif !== bNotif) return bNotif - aNotif; // notifications first
+      if (aNotif !== bNotif) return bNotif - aNotif;
       const aTime = new Date(a.created_at).getTime();
       const bTime = new Date(b.created_at).getTime();
       return sortOrder === "newest" ? bTime - aTime : aTime - bTime;
     });
 
     return result;
-  }, [entries, activeFilter, sortOrder, notificationIds]);
+  }, [entries, activeFilter, sortOrder, notificationIds, searchQuery]);
 
   // Reset filter and detail view when entries change
   useMemo(() => {
@@ -194,6 +215,23 @@ export default function ClusterDetailPanel({
                 >
                   <X size={18} className="text-[#6a7282]" />
                 </button>
+              </div>
+            </div>
+
+            {/* Search bar */}
+            <div className="px-5 pb-3 shrink-0">
+              <div className="relative">
+                <Search
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#99a1af]"
+                />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search moods..."
+                  className="w-full h-[36px] pl-9 pr-3 rounded-[12px] bg-[#f3f4f6] text-[13px] text-[#364153] placeholder-[#99a1af] outline-none focus:ring-2 focus:ring-[#b8e6d5] transition-shadow"
+                />
               </div>
             </div>
 

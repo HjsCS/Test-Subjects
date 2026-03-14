@@ -17,6 +17,10 @@ interface ClusterDetailPanelProps {
   onEntryLocate: (entry: MapEntry) => void;
   notificationIds?: Set<string>;
   onMarkRead?: (id: string) => void;
+  onReactionsUpdate?: (
+    moodId: string,
+    reactions: { user_id: string; emoji: string }[],
+  ) => void;
 }
 
 /** Format relative time */
@@ -55,6 +59,7 @@ export default function ClusterDetailPanel({
   onEntryLocate,
   notificationIds,
   onMarkRead,
+  onReactionsUpdate,
 }: ClusterDetailPanelProps) {
   const [activeFilter, setActiveFilter] = useState<"all" | EmotionCategory>(
     "all",
@@ -133,6 +138,7 @@ export default function ClusterDetailPanel({
               onEntryLocate(selectedEntry);
               setSelectedEntry(null);
             }}
+            onReactionsUpdate={onReactionsUpdate}
           />
         ) : (
           <>
@@ -326,10 +332,15 @@ function EntryDetail({
   entry,
   onBack,
   onLocate,
+  onReactionsUpdate,
 }: {
   entry: MapEntry;
   onBack: () => void;
   onLocate: () => void;
+  onReactionsUpdate?: (
+    moodId: string,
+    reactions: { user_id: string; emoji: string }[],
+  ) => void;
 }) {
   const cat = EMOTION_CATEGORIES[entry.category];
   const dotColor = getEmotionBubbleBorder(entry.emotion_score);
@@ -446,7 +457,11 @@ function EntryDetail({
 
       {/* Reaction bar */}
       <div className="mb-5">
-        <ReactionBar moodId={entry.id} reactions={entry.reactions ?? []} />
+        <ReactionBar
+          moodId={entry.id}
+          reactions={entry.reactions ?? []}
+          onReactionChange={(updated) => onReactionsUpdate?.(entry.id, updated)}
+        />
       </div>
 
       {/* Locate on map button */}

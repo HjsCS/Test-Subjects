@@ -27,6 +27,11 @@ interface MoodDetailModalProps {
   locationName?: string | null;
   /** Called after a successful edit to refresh parent data */
   onEntryUpdated?: (updated: MoodEntry) => void;
+  /** Called when reactions change so parent can update entries state */
+  onReactionsUpdate?: (
+    moodId: string,
+    reactions: { user_id: string; emoji: string }[],
+  ) => void;
 }
 
 function formatDate(dateStr: string): string {
@@ -72,6 +77,7 @@ export default function MoodDetailModal({
   authorAvatarUrl,
   locationName,
   onEntryUpdated,
+  onReactionsUpdate,
 }: MoodDetailModalProps) {
   const cat = EMOTION_CATEGORIES[entry.category];
   const dotColor = getEmotionBubbleBorder(entry.emotion_score);
@@ -344,7 +350,13 @@ export default function MoodDetailModal({
 
           {/* Reaction bar — for all moods */}
           <div className="mb-5">
-            <ReactionBar moodId={entry.id} reactions={entry.reactions ?? []} />
+            <ReactionBar
+              moodId={entry.id}
+              reactions={entry.reactions ?? []}
+              onReactionChange={(updated) =>
+                onReactionsUpdate?.(entry.id, updated)
+              }
+            />
           </div>
 
           {/* Show on Map button */}

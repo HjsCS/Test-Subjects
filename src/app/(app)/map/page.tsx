@@ -289,6 +289,20 @@ function MapPageContent() {
     });
   }, []);
 
+  // Update reactions in local entries state (keeps UI in sync after toggle)
+  const handleReactionsUpdate = useCallback(
+    (moodId: string, reactions: { user_id: string; emoji: string }[]) => {
+      setEntries((prev) =>
+        prev.map((e) => (e.id === moodId ? { ...e, reactions } : e)),
+      );
+      // Also update selectedEntry if it matches
+      setSelectedEntry((prev) =>
+        prev && prev.id === moodId ? { ...prev, reactions } : prev,
+      );
+    },
+    [],
+  );
+
   // Handle single marker click — show MoodDetailCard overlay
   const handleMarkerClick = useCallback(
     async (entry: MapEntry) => {
@@ -615,6 +629,7 @@ function MapPageContent() {
               : null
           }
           locationName={selectedEntryLocationName}
+          onReactionsUpdate={handleReactionsUpdate}
         />
       )}
 
@@ -626,6 +641,7 @@ function MapPageContent() {
         onEntryLocate={handleEntryClick}
         notificationIds={newFriendEntryIds}
         onMarkRead={markRead}
+        onReactionsUpdate={handleReactionsUpdate}
       />
 
       {/* Add Mood Modal */}

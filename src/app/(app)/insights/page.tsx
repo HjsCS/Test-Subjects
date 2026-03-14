@@ -19,7 +19,7 @@ import ProfileHeader from "@/components/ProfileHeader";
 import type { EmotionCategory } from "@/types/database";
 
 interface InsightsData {
-  profile: { display_name: string; email: string };
+  profile: { display_name: string; email: string; avatar_url: string | null };
   totalMoods: number;
   averageScore: number;
   positiveCount: number;
@@ -180,6 +180,7 @@ export default function InsightsPage() {
           <ProfileHeader
             displayName={data?.profile.display_name || "MoodBubble User"}
             email={data?.profile.email || "Not logged in"}
+            avatarUrl={data?.profile.avatar_url}
             totalEntries={total}
             friendCount={data?.friendCount ?? 0}
           />

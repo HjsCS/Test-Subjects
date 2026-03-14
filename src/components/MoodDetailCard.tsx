@@ -4,12 +4,14 @@ import type { MoodEntry } from "@/types/database";
 import type { MoodEntryWithAuthor } from "@/types/database";
 import { getEmotionColor, getEmotionBubbleBorder } from "@/utils/emotion-color";
 import { EMOTION_CATEGORIES } from "@/utils/categories";
+import UserAvatar from "@/components/UserAvatar";
 
 interface MoodDetailCardProps {
   entry: MoodEntry | MoodEntryWithAuthor;
   onClick?: () => void;
   /** Show "Xxx's mood" label for friend entries */
   authorName?: string | null;
+  authorAvatarUrl?: string | null;
 }
 
 /** Format relative time */
@@ -41,6 +43,7 @@ export default function MoodDetailCard({
   entry,
   onClick,
   authorName,
+  authorAvatarUrl,
 }: MoodDetailCardProps) {
   const cat = EMOTION_CATEGORIES[entry.category];
   const dotColor = getEmotionBubbleBorder(entry.emotion_score);
@@ -53,9 +56,12 @@ export default function MoodDetailCard({
     >
       {/* Author label (friend entries) */}
       {authorName && (
-        <p className="text-[11px] font-medium text-[#9b72c0] mb-2">
-          {authorName}&apos;s mood
-        </p>
+        <div className="flex items-center gap-1.5 mb-2">
+          <UserAvatar url={authorAvatarUrl} name={authorName} size={20} />
+          <p className="text-[11px] font-medium text-[#9b72c0]">
+            {authorName}&apos;s mood
+          </p>
+        </div>
       )}
 
       {/* Image — only shown if media_url exists */}

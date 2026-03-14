@@ -64,16 +64,14 @@ export async function GET() {
 
     // Unique places
     const uniquePlaces = new Set(
-      moods.map(
-        (m) =>
-          `${m.latitude.toFixed(3)},${m.longitude.toFixed(3)}`,
-      ),
+      moods.map((m) => `${m.latitude.toFixed(3)},${m.longitude.toFixed(3)}`),
     ).size;
 
     return NextResponse.json({
       profile: {
         display_name: profile?.display_name ?? "MoodBubble User",
         email: user.email ?? "",
+        avatar_url: profile?.avatar_url ?? null,
       },
       totalMoods,
       averageScore,

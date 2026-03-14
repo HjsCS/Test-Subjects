@@ -7,6 +7,7 @@ import type { EmotionCategory } from "@/types/database";
 import { EMOTION_CATEGORIES } from "@/utils/categories";
 import { getEmotionColor, getEmotionBubbleBorder } from "@/utils/emotion-color";
 import { reverseGeocode } from "@/utils/geocoding";
+import UserAvatar from "@/components/UserAvatar";
 
 interface ClusterDetailPanelProps {
   entries: MapEntry[];
@@ -141,13 +142,13 @@ export default function ClusterDetailPanel({
             <div className="flex gap-2.5 px-5 pb-4 overflow-x-auto scrollbar-hide">
               <button
                 onClick={() => setActiveFilter("all")}
-                className={`flex-shrink-0 flex items-center justify-center px-4 py-2 rounded-full text-[14px] font-medium leading-none transition-colors ${
+                className={`flex-shrink-0 flex items-center justify-center gap-1 min-h-[36px] px-4 py-2 rounded-full text-[14px] font-medium leading-none transition-colors ${
                   activeFilter === "all"
                     ? "bg-[#364153] text-white"
                     : "bg-[#f3f4f6] text-[#6a7282] hover:bg-[#e5e7eb]"
                 }`}
               >
-                All ({entries.length})
+                <span>🫧</span> All ({entries.length})
               </button>
 
               {availableCategories.map((cat) => {
@@ -157,7 +158,7 @@ export default function ClusterDetailPanel({
                   <button
                     key={cat}
                     onClick={() => setActiveFilter(cat)}
-                    className={`flex-shrink-0 flex items-center justify-center gap-1 px-4 py-2 rounded-full text-[14px] font-medium leading-none transition-colors ${
+                    className={`flex-shrink-0 flex items-center justify-center gap-1 min-h-[36px] px-4 py-2 rounded-full text-[14px] font-medium leading-none transition-colors ${
                       activeFilter === cat
                         ? "bg-[#364153] text-white"
                         : "bg-[#f3f4f6] text-[#6a7282] hover:bg-[#e5e7eb]"
@@ -193,9 +194,16 @@ export default function ClusterDetailPanel({
                     >
                       {/* Author label for friend entries */}
                       {!isOwn && authorName && (
-                        <span className="text-[11px] text-[#9b72c0] font-medium mb-1.5">
-                          {authorName}&apos;s mood
-                        </span>
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <UserAvatar
+                            url={entry.profiles?.avatar_url}
+                            name={authorName}
+                            size={18}
+                          />
+                          <span className="text-[11px] text-[#9b72c0] font-medium">
+                            {authorName}&apos;s mood
+                          </span>
+                        </div>
                       )}
 
                       {/* Thumbnail if media exists */}
@@ -286,6 +294,7 @@ function EntryDetail({
   const bgColor = getEmotionColor(entry.emotion_score);
   const isOwn = entry.is_own !== false;
   const authorName = entry.profiles?.display_name;
+  const authorAvatarUrl = entry.profiles?.avatar_url;
 
   // Reverse geocode on mount
   const [locationName, setLocationName] = useState<string | null>(null);
@@ -313,6 +322,7 @@ function EntryDetail({
       {/* Author (if friend entry) */}
       {!isOwn && authorName && (
         <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-[12px] bg-[#f5f0ff]">
+          <UserAvatar url={authorAvatarUrl} name={authorName} size={22} />
           <span className="text-[12px] text-[#9b72c0] font-medium">
             {authorName}&apos;s mood
           </span>

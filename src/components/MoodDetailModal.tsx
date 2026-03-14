@@ -3,11 +3,9 @@
 import { useCallback } from "react";
 import { X, MapPin, Clock, Eye } from "lucide-react";
 import type { MoodEntry, MoodEntryWithAuthor } from "@/types/database";
-import {
-  getEmotionColor,
-  getEmotionBubbleBorder,
-} from "@/utils/emotion-color";
+import { getEmotionColor, getEmotionBubbleBorder } from "@/utils/emotion-color";
 import { EMOTION_CATEGORIES } from "@/utils/categories";
+import UserAvatar from "@/components/UserAvatar";
 
 interface MoodDetailModalProps {
   entry: (MoodEntry | MoodEntryWithAuthor) & { is_own?: boolean };
@@ -17,6 +15,7 @@ interface MoodDetailModalProps {
   onLocate?: () => void;
   /** For friend entries */
   authorName?: string | null;
+  authorAvatarUrl?: string | null;
   /** Resolved location name */
   locationName?: string | null;
 }
@@ -69,6 +68,7 @@ export default function MoodDetailModal({
   onClose,
   onLocate,
   authorName,
+  authorAvatarUrl,
   locationName,
 }: MoodDetailModalProps) {
   const cat = EMOTION_CATEGORIES[entry.category];
@@ -87,10 +87,7 @@ export default function MoodDetailModal({
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-[9998] bg-black/30"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 z-[9998] bg-black/30" onClick={onClose} />
 
       {/* Bottom sheet modal */}
       <div
@@ -117,6 +114,7 @@ export default function MoodDetailModal({
           {/* Author label */}
           {authorName && (
             <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-[12px] bg-[#f5f0ff]">
+              <UserAvatar url={authorAvatarUrl} name={authorName} size={22} />
               <span className="text-[12px] text-[#9b72c0] font-medium">
                 {authorName}&apos;s mood
               </span>
@@ -182,7 +180,8 @@ export default function MoodDetailModal({
                 <MapPin size={16} className="text-[#6a7282]" />
               </div>
               <span className="text-[13px] font-medium text-[#364153]">
-                {locationName || `${entry.latitude.toFixed(4)}, ${entry.longitude.toFixed(4)}`}
+                {locationName ||
+                  `${entry.latitude.toFixed(4)}, ${entry.longitude.toFixed(4)}`}
               </span>
             </div>
 
@@ -192,7 +191,9 @@ export default function MoodDetailModal({
                 <Eye size={16} className="text-[#6a7282]" />
               </div>
               <span className="text-[13px] font-medium text-[#364153]">
-                {entry.visibility === "friends" ? "Shared with Friends" : "Private"}
+                {entry.visibility === "friends"
+                  ? "Shared with Friends"
+                  : "Private"}
               </span>
             </div>
           </div>

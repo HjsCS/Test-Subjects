@@ -1,6 +1,7 @@
 "use client";
 
 import { UserMinus, Check, X, UserPlus, Clock } from "lucide-react";
+import UserAvatar from "@/components/UserAvatar";
 
 interface FriendCardProps {
   displayName: string;
@@ -20,6 +21,7 @@ interface FriendCardProps {
 
 export default function FriendCard({
   displayName,
+  avatarUrl,
   mode,
   isPending,
   isFriend,
@@ -32,9 +34,7 @@ export default function FriendCard({
   return (
     <div className="flex items-center gap-3 bg-white rounded-[16px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-4 py-3">
       {/* Avatar */}
-      <div className="w-[44px] h-[44px] rounded-full bg-gradient-to-br from-[#b8e6d5] to-[#ffe8b8] flex items-center justify-center text-lg shrink-0">
-        {displayName.charAt(0).toUpperCase()}
-      </div>
+      <UserAvatar url={avatarUrl} name={displayName} size={44} />
 
       {/* Name */}
       <div className="flex-1 min-w-0">

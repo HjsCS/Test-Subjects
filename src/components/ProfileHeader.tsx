@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { Pencil, Search, LogOut, Users, ChevronRight } from "lucide-react";
 import EditProfileModal from "@/components/EditProfileModal";
 import FriendCard from "@/components/FriendCard";
+import UserAvatar from "@/components/UserAvatar";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types/database";
 
 interface ProfileHeaderProps {
   displayName: string;
   email: string;
+  avatarUrl?: string | null;
   totalEntries: number;
   friendCount: number;
 }
@@ -18,12 +20,14 @@ interface ProfileHeaderProps {
 export default function ProfileHeader({
   displayName,
   email,
+  avatarUrl,
   totalEntries,
   friendCount,
 }: ProfileHeaderProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [name, setName] = useState(displayName);
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState(avatarUrl ?? null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
 
@@ -145,9 +149,7 @@ export default function ProfileHeader({
     <>
       {/* Profile Card */}
       <div className="bg-white rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-6 py-7 flex items-center gap-4">
-        <div className="w-[80px] h-[80px] rounded-full bg-gradient-to-br from-[#b8e6d5] to-[#ffe8b8] flex items-center justify-center text-3xl shrink-0">
-          🫧
-        </div>
+        <UserAvatar url={currentAvatarUrl} name={name} size={80} />
         <div className="flex flex-col gap-1.5 flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h2 className="text-[16px] font-medium text-[#101828] truncate">
@@ -232,7 +234,11 @@ export default function ProfileHeader({
         isOpen={editOpen}
         onClose={() => setEditOpen(false)}
         currentName={name}
-        onSave={(newName) => setName(newName)}
+        currentAvatarUrl={currentAvatarUrl}
+        onSave={(newName, newAvatarUrl) => {
+          setName(newName);
+          if (newAvatarUrl !== undefined) setCurrentAvatarUrl(newAvatarUrl);
+        }}
       />
     </>
   );

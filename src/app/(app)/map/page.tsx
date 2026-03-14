@@ -449,6 +449,11 @@ function MapPageContent() {
                     ? selectedEntry.profiles?.display_name
                     : null
                 }
+                authorAvatarUrl={
+                  selectedEntry.is_own === false
+                    ? selectedEntry.profiles?.avatar_url
+                    : null
+                }
                 onClick={() => setDetailModalOpen(true)}
               />
             </div>
@@ -491,6 +496,11 @@ function MapPageContent() {
           authorName={
             selectedEntry.is_own === false
               ? selectedEntry.profiles?.display_name
+              : null
+          }
+          authorAvatarUrl={
+            selectedEntry.is_own === false
+              ? selectedEntry.profiles?.avatar_url
               : null
           }
           locationName={selectedEntryLocationName}

@@ -294,10 +294,15 @@ function FlyToHandler({
   flyTo: { lat: number; lng: number } | null;
 }) {
   const map = useMap();
-  const prevFlyTo = useRef(flyTo);
+  const prevFlyTo = useRef<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
-    if (flyTo && flyTo !== prevFlyTo.current) {
+    if (
+      flyTo &&
+      (!prevFlyTo.current ||
+        flyTo.lat !== prevFlyTo.current.lat ||
+        flyTo.lng !== prevFlyTo.current.lng)
+    ) {
       map.flyTo([flyTo.lat, flyTo.lng], 16, { duration: 0.8 });
       prevFlyTo.current = flyTo;
     }

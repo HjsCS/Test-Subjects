@@ -5,7 +5,6 @@ import type { MoodEntryWithAuthor } from "@/types/database";
 import { getEmotionColor, getEmotionBubbleBorder } from "@/utils/emotion-color";
 import { EMOTION_CATEGORIES } from "@/utils/categories";
 import UserAvatar from "@/components/UserAvatar";
-import ReactionBar from "@/components/ReactionBar";
 
 interface MoodDetailCardProps {
   entry: MoodEntry | MoodEntryWithAuthor;
@@ -97,10 +96,26 @@ export default function MoodDetailCard({
         </p>
       )}
 
-      {/* Reactions */}
+      {/* Reaction summary (read-only — card itself is a button) */}
       {(entry.reactions ?? []).length > 0 && (
-        <div className="mt-2" onClick={(e) => e.stopPropagation()}>
-          <ReactionBar moodId={entry.id} reactions={entry.reactions ?? []} />
+        <div className="flex flex-wrap gap-1 mt-2">
+          {(() => {
+            const counts = new Map<string, number>();
+            for (const r of entry.reactions ?? []) {
+              counts.set(r.emoji, (counts.get(r.emoji) ?? 0) + 1);
+            }
+            return Array.from(counts.entries()).map(([emoji, count]) => (
+              <span
+                key={emoji}
+                className="flex items-center gap-0.5 h-[24px] px-1.5 rounded-full bg-[#f3f4f6] text-[12px]"
+              >
+                <span>{emoji}</span>
+                <span className="text-[10px] text-[#6a7282] font-medium">
+                  {count}
+                </span>
+              </span>
+            ));
+          })()}
         </div>
       )}
 

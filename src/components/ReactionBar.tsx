@@ -90,24 +90,31 @@ export default function ReactionBar({
       (r) => r.user_id === currentUserId && r.emoji === emoji,
     );
 
-    let updated: Reaction[];
+    let optimistic: Reaction[];
     if (alreadyReacted) {
-      updated = localReactions.filter(
+      optimistic = localReactions.filter(
         (r) => !(r.user_id === currentUserId && r.emoji === emoji),
       );
     } else {
-      updated = [...localReactions, { user_id: currentUserId, emoji }];
+      optimistic = [...localReactions, { user_id: currentUserId, emoji }];
     }
 
-    setLocalReactions(updated);
-    onReactionChange?.(updated);
+    setLocalReactions(optimistic);
+    onReactionChange?.(optimistic);
 
     try {
-      await fetch(`/api/moods/${moodId}`, {
+      const res = await fetch(`/api/moods/${moodId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reactions: updated }),
+        body: JSON.stringify({ toggle_reaction: emoji }),
       });
+      if (res.ok) {
+        // Use server response as source of truth
+        const data = await res.json();
+        const serverReactions: Reaction[] = data.reactions ?? [];
+        setLocalReactions(serverReactions);
+        onReactionChange?.(serverReactions);
+      }
     } catch {
       // Revert on error
       setLocalReactions(localReactions);

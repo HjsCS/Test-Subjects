@@ -19,7 +19,6 @@ import {
   ChevronRight,
   X,
   Loader2,
-  ImagePlus,
 } from "lucide-react";
 import type { EmotionCategory, Visibility } from "@/types/database";
 import LocationPickerSheet from "@/components/LocationPickerSheet";
@@ -78,7 +77,6 @@ export default function AddMoodModal({
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Cleanup photo preview URL
   function clearPhoto() {
@@ -237,14 +235,6 @@ export default function AddMoodModal({
           onChange={handleFileChange}
           className="hidden"
         />
-        <input
-          ref={cameraInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={handleFileChange}
-          className="hidden"
-        />
         <div className="flex gap-3">
           {/* Photo preview or placeholder */}
           <div className="w-[96px] h-[96px] rounded-[16px] bg-[#f3f4f6] shadow-[0px_4px_15px_0px_rgba(0,0,0,0.06)] overflow-hidden relative">
@@ -267,26 +257,15 @@ export default function AddMoodModal({
               <div className="w-full h-full bg-gradient-to-br from-[#b8e6d5] to-[#ffe8b8] opacity-60" />
             )}
           </div>
-          {/* Camera button */}
-          <button
-            type="button"
-            onClick={() => cameraInputRef.current?.click()}
-            className="w-[96px] h-[96px] rounded-[16px] bg-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center gap-1"
-          >
-            <Camera size={24} className="text-[#99a1af]" />
-            <span className="text-[11px] font-medium text-[#99a1af]">
-              Camera
-            </span>
-          </button>
-          {/* Gallery button */}
+          {/* Add Photo button */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="w-[96px] h-[96px] rounded-[16px] bg-white shadow-[0px_4px_15px_0px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center gap-1"
           >
-            <ImagePlus size={24} className="text-[#99a1af]" />
+            <Camera size={24} className="text-[#99a1af]" />
             <span className="text-[11px] font-medium text-[#99a1af]">
-              Gallery
+              Add Photo
             </span>
           </button>
         </div>

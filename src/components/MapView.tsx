@@ -260,13 +260,15 @@ function createClusterIcon(cluster: L.MarkerCluster, notifIds?: Set<string>) {
  * Blue dot icon showing user's current GPS position.
  */
 const userLocationIcon = L.divIcon({
-  html: `<div style="width:20px;height:20px;background:rgba(66,133,244,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center">
-    <div style="width:12px;height:12px;background:#4285F4;border:2px solid white;border-radius:50%;box-shadow:0 0 0 2px rgba(66,133,244,0.4)"></div>
+  html: `<div style="width:32px;height:32px;position:relative;display:flex;align-items:center;justify-content:center">
+    <div style="position:absolute;inset:0;background:rgba(66,133,244,0.2);border-radius:50%;animation:pulse-ring 2s ease-out infinite"></div>
+    <div style="width:16px;height:16px;background:#4285F4;border:3px solid white;border-radius:50%;box-shadow:0 0 0 2px rgba(66,133,244,0.4);position:relative;z-index:1"></div>
+    <style>@keyframes pulse-ring{0%{transform:scale(0.8);opacity:1}100%{transform:scale(2);opacity:0}}</style>
   </div>`,
   className: "",
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
-  popupAnchor: [0, -14],
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+  popupAnchor: [0, -18],
 });
 
 /**

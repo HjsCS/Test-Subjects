@@ -170,7 +170,7 @@ export default function AddMoodModal({
   return (
     <div className="fixed inset-0 z-[9999] bg-[#fefbf6] overflow-y-auto">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-[50px] pb-4">
+      <div className="flex items-center justify-between px-5 pt-[max(env(safe-area-inset-top,12px),12px)] pb-3">
         <button
           type="button"
           onClick={onClose}

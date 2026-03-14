@@ -28,9 +28,9 @@ export default function FriendsPage() {
         const data = await res.json();
         setFriends(data);
         const ids = new Set<string>(
-          data.map((f: FriendshipWithProfile) =>
-            f.profiles?.id,
-          ).filter(Boolean),
+          data
+            .map((f: FriendshipWithProfile) => f.profiles?.id)
+            .filter(Boolean),
         );
         setFriendIds(ids);
       }
@@ -48,8 +48,12 @@ export default function FriendsPage() {
         setOutgoing(data.outgoing ?? []);
         const ids = new Set<string>(
           [
-            ...(data.incoming ?? []).map((r: FriendshipWithProfile) => r.profiles?.id),
-            ...(data.outgoing ?? []).map((r: FriendshipWithProfile) => r.profiles?.id),
+            ...(data.incoming ?? []).map(
+              (r: FriendshipWithProfile) => r.profiles?.id,
+            ),
+            ...(data.outgoing ?? []).map(
+              (r: FriendshipWithProfile) => r.profiles?.id,
+            ),
           ].filter(Boolean),
         );
         setPendingIds(ids);
@@ -167,7 +171,7 @@ export default function FriendsPage() {
   const isSearchActive = searchQuery.trim().length > 0;
 
   return (
-    <div className="bg-[#fefbf6] min-h-screen">
+    <div className="bg-[#fefbf6] min-h-screen pb-[120px]">
       {/* Header */}
       <div className="flex items-center justify-center px-5 pt-[50px] pb-4">
         <span className="text-[16px] font-medium text-[#101828]">Friends</span>

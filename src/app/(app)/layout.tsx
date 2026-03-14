@@ -7,7 +7,7 @@ export default function AppLayout({
 }>) {
   return (
     <>
-      <main className="pb-[100px]">{children}</main>
+      <main>{children}</main>
       <BottomNav />
     </>
   );

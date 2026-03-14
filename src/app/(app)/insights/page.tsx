@@ -139,7 +139,7 @@ export default async function InsightsPage() {
   ];
 
   return (
-    <div className="bg-[#fefbf6] min-h-screen">
+    <div className="bg-[#fefbf6] min-h-screen pb-[120px]">
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-[50px] pb-4">
         <div className="w-[40px] h-[40px] flex items-center justify-center">

@@ -108,7 +108,7 @@ function MapPageContent() {
   );
 
   return (
-    <div className="relative h-screen w-full">
+    <div className="relative w-full" style={{ height: "100dvh" }}>
       {/* Map */}
       <MapView
         entries={entries}
@@ -160,7 +160,11 @@ function MapPageContent() {
 
 export default function MapPage() {
   return (
-    <Suspense fallback={<div className="h-screen w-full bg-[#fefbf6]" />}>
+    <Suspense
+      fallback={
+        <div className="w-full bg-[#fefbf6]" style={{ height: "100dvh" }} />
+      }
+    >
       <MapPageContent />
     </Suspense>
   );

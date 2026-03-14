@@ -144,7 +144,7 @@ export default function ProfileHeader({
   return (
     <>
       {/* Profile Card */}
-      <div className="mx-0 bg-white rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-6 py-7 flex items-center gap-4">
+      <div className="bg-white rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-6 py-7 flex items-center gap-4">
         <div className="w-[80px] h-[80px] rounded-full bg-gradient-to-br from-[#b8e6d5] to-[#ffe8b8] flex items-center justify-center text-3xl shrink-0">
           🫧
         </div>
@@ -184,7 +184,7 @@ export default function ProfileHeader({
       </div>
 
       {/* Friend Search Bar */}
-      <div className="mx-0">
+      <div>
         <div className="relative">
           <Search
             size={18}

@@ -147,10 +147,10 @@ export default async function InsightsPage() {
       </div>
 
       {/* Scrollable content */}
-      <div className="flex flex-col gap-4 px-0 pb-[120px] overflow-y-auto">
+      <div className="flex flex-col gap-4 px-5 pb-[120px] overflow-y-auto">
         {/* Supabase warning */}
         {!isSupabaseConfigured() && (
-          <div className="mx-5 rounded-[16px] border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
+          <div className="rounded-[16px] border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
             <strong>Supabase not configured.</strong> Add credentials to{" "}
             <code className="rounded bg-amber-200/50 px-1 py-0.5">
               .env.local
@@ -167,7 +167,7 @@ export default async function InsightsPage() {
         />
 
         {/* Mood Highlights */}
-        <div className="mx-0 rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-5 py-5 bg-gradient-to-b from-[rgba(184,230,213,0.2)] to-[rgba(168,214,197,0.2)]">
+        <div className="rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-5 py-5 bg-gradient-to-b from-[rgba(184,230,213,0.2)] to-[rgba(168,214,197,0.2)]">
           <h3 className="text-[15px] font-medium text-[#4a8a76] mb-4">
             Mood Highlights
           </h3>
@@ -196,7 +196,7 @@ export default async function InsightsPage() {
         </div>
 
         {/* Stats Grid — 3 cards */}
-        <div className="mx-0 flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
           {/* Mood Entries */}
           <div className="flex-1 bg-white rounded-[16px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] flex flex-col items-center justify-between py-4 px-5 h-[138px]">
             <div className="w-[48px] h-[48px] bg-[#ffe8b8] rounded-full flex items-center justify-center">
@@ -238,7 +238,7 @@ export default async function InsightsPage() {
         </div>
 
         {/* Emotion Categories */}
-        <div className="mx-0 bg-white rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-5 py-5">
+        <div className="bg-white rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-5 py-5">
           <h3 className="text-[15px] font-medium text-[#101828] mb-4">
             Emotion Categories
           </h3>
@@ -287,7 +287,7 @@ export default async function InsightsPage() {
         </div>
 
         {/* Mood Trend (placeholder chart area) */}
-        <div className="mx-0 bg-white rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-5 py-5">
+        <div className="bg-white rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-5 py-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[15px] font-medium text-[#101828]">
               Mood Trend
@@ -327,7 +327,7 @@ export default async function InsightsPage() {
         </div>
 
         {/* Map Insights */}
-        <div className="mx-0 rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-5 py-5 bg-gradient-to-b from-[rgba(255,232,184,0.2)] to-[rgba(255,224,160,0.2)]">
+        <div className="rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-5 py-5 bg-gradient-to-b from-[rgba(255,232,184,0.2)] to-[rgba(255,224,160,0.2)]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[15px] font-medium text-[#9d7d3f]">
               Map Insights
@@ -349,7 +349,7 @@ export default async function InsightsPage() {
         </div>
 
         {/* Monthly Recap */}
-        <div className="mx-0 bg-white rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-5 py-5">
+        <div className="bg-white rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-5 py-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[15px] font-medium text-[#101828]">
               March Recap

@@ -9,7 +9,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import type { MoodEntry } from "@/types/database";
+import type { MoodEntryWithAuthor } from "@/types/database";
 import {
   getEmotionBubbleBg,
   getEmotionBubbleBorder,
@@ -17,8 +17,12 @@ import {
 } from "@/utils/emotion-color";
 import { EMOTION_CATEGORIES } from "@/utils/categories";
 
+interface MapEntry extends MoodEntryWithAuthor {
+  is_own?: boolean;
+}
+
 interface MapViewProps {
-  entries: MoodEntry[];
+  entries: MapEntry[];
   onMapClick?: (lngLat: { lng: number; lat: number }) => void;
 }
 
@@ -34,16 +38,20 @@ function getBubbleSizeFromScore(score: number): number {
 
 /**
  * Create a circular bubble icon matching the Figma design.
+ * Friend entries get a dashed border to distinguish them.
  */
-function createBubbleIcon(score: number) {
+function createBubbleIcon(score: number, isOwn: boolean = true) {
   const size = getBubbleSizeFromScore(score);
   const bg = getEmotionBubbleBg(score);
   const border = getEmotionBubbleBorder(score);
+  const strokeDash = isOwn ? "" : 'stroke-dasharray="4 3"';
+  const opacity = isOwn ? "0.95" : "0.80";
 
   const svg = `
     <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - 1}"
-        fill="${bg}" stroke="${border}" stroke-width="1" opacity="0.95"
+      <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - 2}"
+        fill="${bg}" stroke="${border}" stroke-width="${isOwn ? 1 : 2}"
+        opacity="${opacity}" ${strokeDash}
         style="filter: drop-shadow(0px 10px 30px rgba(0,0,0,0.08));"
       />
     </svg>`;
@@ -75,6 +83,7 @@ function MapClickHandler({
 
 /**
  * Full-screen Leaflet map with Figma-styled bubble markers.
+ * Supports friend entries with dashed borders and author names.
  */
 export default function MapView({ entries, onMapClick }: MapViewProps) {
   return (
@@ -94,15 +103,23 @@ export default function MapView({ entries, onMapClick }: MapViewProps) {
       {entries.map((entry) => {
         const cat = EMOTION_CATEGORIES[entry.category];
         const accentColor = getEmotionAccentColor(entry.emotion_score);
+        const isOwn = entry.is_own !== false;
+        const authorName = entry.profiles?.display_name;
 
         return (
           <Marker
             key={entry.id}
             position={[entry.latitude, entry.longitude]}
-            icon={createBubbleIcon(entry.emotion_score)}
+            icon={createBubbleIcon(entry.emotion_score, isOwn)}
           >
             <Popup>
               <div className="text-sm leading-relaxed min-w-[160px]">
+                {/* Show author name for friend entries */}
+                {!isOwn && authorName && (
+                  <div className="text-[11px] text-[#9b72c0] font-medium mb-1">
+                    {authorName}&apos;s mood
+                  </div>
+                )}
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className="text-base">{cat.emoji}</span>
                   <strong style={{ color: accentColor }}>{cat.label}</strong>

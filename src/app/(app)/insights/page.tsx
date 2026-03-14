@@ -15,25 +15,59 @@ import {
 import { isSupabaseConfigured } from "@/lib/supabase/check";
 import type { MoodEntry } from "@/types/database";
 import type { EmotionCategory } from "@/types/database";
+import type { Profile } from "@/types/database";
+import ProfileHeader from "@/components/ProfileHeader";
 
 /**
  * Profile / Insights page — Server Component.
- * Redesigned to match the Figma Profile screen.
+ * Now auth-aware: shows real user data.
  */
 export default async function InsightsPage() {
   let moods: MoodEntry[] = [];
+  let profile: Profile | null = null;
+  let userEmail = "";
+  let friendCount = 0;
 
   if (isSupabaseConfigured()) {
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = await createClient();
 
-    const { data: entries } = await supabase
-      .from("mood_entries")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(50);
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    moods = (entries as MoodEntry[]) ?? [];
+    if (user) {
+      userEmail = user.email || "";
+
+      // Fetch profile
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      profile = profileData as Profile | null;
+
+      // Fetch only THIS user's mood entries
+      const { data: entries } = await supabase
+        .from("mood_entries")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      moods = (entries as MoodEntry[]) ?? [];
+
+      // Count accepted friends
+      const { count } = await supabase
+        .from("friendships")
+        .select("*", { count: "exact", head: true })
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+        .eq("status", "accepted");
+
+      friendCount = count ?? 0;
+    }
   }
 
   // Stats
@@ -129,26 +163,13 @@ export default async function InsightsPage() {
           </div>
         )}
 
-        {/* Profile Card */}
-        <div className="mx-0 bg-white rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-6 py-7 flex items-center gap-4">
-          <div className="w-[80px] h-[80px] rounded-full bg-gradient-to-br from-[#b8e6d5] to-[#ffe8b8] flex items-center justify-center text-3xl">
-            🫧
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <h2 className="text-[16px] font-medium text-[#101828]">
-              MoodBubble User
-            </h2>
-            <p className="text-[13px] text-[#6a7282]">@anonymous</p>
-            <div className="flex gap-2">
-              <span className="bg-[#b8e6d5] text-[#6baa96] text-[11px] px-[11px] py-[5px] rounded-full">
-                Level {Math.min(Math.floor(total / 5) + 1, 10)}
-              </span>
-              <span className="bg-[#ffe8b8] text-[#e8b963] text-[11px] px-[11px] py-[5px] rounded-full">
-                {total} Entries
-              </span>
-            </div>
-          </div>
-        </div>
+        {/* Profile Card + Logout (Client Component) */}
+        <ProfileHeader
+          displayName={profile?.display_name || "MoodBubble User"}
+          email={userEmail || "Not logged in"}
+          totalEntries={total}
+          friendCount={friendCount}
+        />
 
         {/* Mood Highlights */}
         <div className="mx-0 rounded-[24px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.06)] px-5 py-5 bg-gradient-to-b from-[rgba(184,230,213,0.2)] to-[rgba(168,214,197,0.2)]">
@@ -281,11 +302,11 @@ export default async function InsightsPage() {
 
           {/* Placeholder chart area */}
           <div className="w-full h-[160px] bg-gradient-to-b from-[rgba(184,230,213,0.3)] to-transparent rounded-[16px] flex items-end justify-between px-4 pb-2">
-            {["Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Mon"].map((day, i) => (
+            {["Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Mon"].map((day) => (
               <div key={day} className="flex flex-col items-center gap-2">
                 <div
                   className="w-[6px] rounded-full bg-[#b8e6d5]"
-                  style={{ height: `${40 + Math.random() * 80}px` }}
+                  style={{ height: `${40 + Math.floor(Math.random() * 80)}px` }}
                 />
                 <span className="text-[11px] text-[#9ca3af]">{day}</span>
               </div>

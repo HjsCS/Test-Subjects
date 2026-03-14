@@ -1,30 +1,38 @@
 "use client";
 
-import { Suspense, useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Clock, Eye } from "lucide-react";
 import AddMoodModal from "@/components/AddMoodModal";
 
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
-import type { MoodEntry, EmotionCategory, Visibility } from "@/types/database";
+import type {
+  MoodEntryWithAuthor,
+  EmotionCategory,
+  Visibility,
+} from "@/types/database";
+
+/** Extended entry with is_own flag from the API */
+interface MapMoodEntry extends MoodEntryWithAuthor {
+  is_own?: boolean;
+}
 
 function MapPageContent() {
   const searchParams = useSearchParams();
-  const [entries, setEntries] = useState<MoodEntry[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
+  const shouldAddMood = searchParams.get("addMood") === "true";
+
+  const [entries, setEntries] = useState<MapMoodEntry[]>([]);
+  const [modalOpen, setModalOpen] = useState(shouldAddMood);
+
+  const defaultLngLat = useMemo(
+    () => (shouldAddMood ? { lng: 144.9631, lat: -37.8136 } : null),
+    [shouldAddMood],
+  );
   const [selectedLngLat, setSelectedLngLat] = useState<{
     lng: number;
     lat: number;
-  } | null>(null);
-
-  // Open modal if addMood query param is present
-  useEffect(() => {
-    if (searchParams.get("addMood") === "true") {
-      setSelectedLngLat((prev) => prev ?? { lng: 144.9631, lat: -37.8136 });
-      setModalOpen(true);
-    }
-  }, [searchParams]);
+  } | null>(defaultLngLat);
 
   // Fetch entries on mount
   useEffect(() => {
@@ -48,7 +56,7 @@ function MapPageContent() {
     setModalOpen(true);
   }, []);
 
-  // Handle form submit
+  // Handle form submit — no user_id sent, server injects it
   const handleSubmit = useCallback(
     async (data: {
       emotion_score: number;
@@ -63,7 +71,6 @@ function MapPageContent() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            user_id: "anonymous",
             latitude: selectedLngLat.lat,
             longitude: selectedLngLat.lng,
             ...data,
@@ -72,7 +79,7 @@ function MapPageContent() {
 
         if (res.ok) {
           const newEntry = await res.json();
-          setEntries((prev) => [newEntry, ...prev]);
+          setEntries((prev) => [{ ...newEntry, is_own: true }, ...prev]);
         }
       } catch (err) {
         console.error("Failed to create mood:", err);

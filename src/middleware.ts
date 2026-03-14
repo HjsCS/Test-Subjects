@@ -1,6 +1,9 @@
 import { updateSession } from "@/lib/supabase/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 
+// Routes that don't require authentication
+const PUBLIC_ROUTES = ["/login", "/signup"];
+
 export async function middleware(request: NextRequest) {
   // Skip Supabase session refresh if env vars are not configured yet
   if (
@@ -10,7 +13,26 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  return await updateSession(request);
+  // Refresh session and get current user
+  const { response, user } = await updateSession(request);
+
+  const { pathname } = request.nextUrl;
+  const isPublicRoute = PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
+  const isApiRoute = pathname.startsWith("/api/");
+
+  // Authenticated user visiting login/signup → redirect to /map
+  if (isPublicRoute && user) {
+    return NextResponse.redirect(new URL("/map", request.url));
+  }
+
+  // Unauthenticated user visiting protected page → redirect to /login
+  if (!isPublicRoute && !isApiRoute && !user) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return response;
 }
 
 export const config = {

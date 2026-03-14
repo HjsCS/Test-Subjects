@@ -8,7 +8,7 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Clock, Eye, LocateFixed } from "lucide-react";
 import AddMoodModal from "@/components/AddMoodModal";
@@ -34,6 +34,7 @@ type AccessFilter = "all" | "private" | "friends";
 
 function MapPageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const shouldAddMood = searchParams.get("addMood") === "true";
 
   const [entries, setEntries] = useState<MapMoodEntry[]>([]);
@@ -120,6 +121,9 @@ function MapPageContent() {
   useEffect(() => {
     if (!shouldAddMood) return;
 
+    // Clear the query param so it doesn't re-trigger on re-render
+    router.replace("/map", { scroll: false });
+
     const openModal = async () => {
       try {
         const pos = await getCurrentPosition();
@@ -135,7 +139,7 @@ function MapPageContent() {
     };
 
     openModal();
-  }, [shouldAddMood]);
+  }, [shouldAddMood, router]);
 
   // Filter entries based on time and access filters
   const filteredEntries = useMemo(() => {

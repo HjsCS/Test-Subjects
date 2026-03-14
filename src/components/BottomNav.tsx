@@ -10,6 +10,10 @@ export default function BottomNav() {
 
   const isMap = pathname === "/map" || pathname === "/";
   const isProfile = pathname === "/insights";
+  const isFriends = pathname === "/friends";
+
+  // Hide nav on Profile and Friends pages
+  if (isProfile || isFriends) return null;
 
   function handleAddMood() {
     if (isMap) {

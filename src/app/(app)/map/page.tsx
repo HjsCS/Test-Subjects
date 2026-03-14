@@ -117,7 +117,7 @@ function MapPageContent() {
     return stopWatch;
   }, []);
 
-  // Open modal when navigated with ?addMood=true (from BottomNav)
+  // Open modal when navigated with ?addMood=true (from other pages)
   useEffect(() => {
     if (!shouldAddMood) return;
 
@@ -131,7 +131,6 @@ function MapPageContent() {
         const name = await reverseGeocode(pos.lat, pos.lng);
         setLocationName(name);
       } catch {
-        // GPS unavailable — open modal without coordinates, user can pick on map
         setSelectedLngLat(null);
         setLocationName(null);
       }
@@ -140,6 +139,25 @@ function MapPageContent() {
 
     openModal();
   }, [shouldAddMood, router]);
+
+  // Listen for custom event from BottomNav when already on map page
+  useEffect(() => {
+    const handleOpenAddMood = async () => {
+      try {
+        const pos = await getCurrentPosition();
+        setSelectedLngLat({ lat: pos.lat, lng: pos.lng });
+        const name = await reverseGeocode(pos.lat, pos.lng);
+        setLocationName(name);
+      } catch {
+        setSelectedLngLat(null);
+        setLocationName(null);
+      }
+      setModalOpen(true);
+    };
+
+    window.addEventListener("openAddMood", handleOpenAddMood);
+    return () => window.removeEventListener("openAddMood", handleOpenAddMood);
+  }, []);
 
   // Filter entries based on time and access filters
   const filteredEntries = useMemo(() => {

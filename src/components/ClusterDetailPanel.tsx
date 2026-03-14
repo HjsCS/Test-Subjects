@@ -209,7 +209,7 @@ export default function ClusterDetailPanel({
                       {/* Thumbnail if media exists */}
                       {entry.media_url && (
                         <div
-                          className="w-full h-[80px] rounded-[16px] overflow-hidden mb-2.5"
+                          className="w-full h-[80px] shrink-0 rounded-[16px] overflow-hidden mb-2.5"
                           style={{
                             backgroundColor: getEmotionColor(
                               entry.emotion_score,
@@ -309,7 +309,7 @@ function EntryDetail({
   }, [entry.latitude, entry.longitude]);
 
   return (
-    <div className="flex flex-col px-5 pt-4 pb-28 overflow-y-auto">
+    <div className="flex-1 min-h-0 flex flex-col px-5 pt-4 pb-28 overflow-y-auto">
       {/* Back button */}
       <button
         onClick={onBack}
@@ -332,13 +332,13 @@ function EntryDetail({
       {/* Hero image */}
       {entry.media_url && (
         <div
-          className="w-full rounded-[24px] overflow-hidden shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] mb-5"
+          className="w-full h-[160px] shrink-0 rounded-[24px] overflow-hidden shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] mb-5"
           style={{ backgroundColor: bgColor }}
         >
           <img
             src={entry.media_url}
             alt="Mood photo"
-            className="w-full max-h-[200px] object-cover"
+            className="w-full h-full object-cover"
           />
         </div>
       )}

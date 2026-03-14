@@ -23,13 +23,13 @@ const ANNIVERSARY_WINDOWS: [number, string][] = [
 const DATE_TOLERANCE_DAYS = 2;
 
 /** Minimum gap between two reminders (ms) */
-const REMINDER_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+const REMINDER_COOLDOWN_MS = 10 * 1000; // 10 seconds (DEBUG)
 
 /** Max reminders per session */
-const MAX_REMINDERS_PER_SESSION = 5;
+const MAX_REMINDERS_PER_SESSION = 9999; // unlimited (DEBUG)
 
 /** Check interval for location proximity (ms) */
-const LOCATION_CHECK_INTERVAL_MS = 60 * 1000; // 60 seconds
+const LOCATION_CHECK_INTERVAL_MS = 10 * 1000; // 10 seconds (DEBUG)
 
 /**
  * Hook that produces memory reminders based on:
@@ -40,8 +40,9 @@ export function useMemoryReminders(
   entries: MapEntry[],
   userLocation: { lat: number; lng: number } | null,
 ) {
-  const [currentReminder, setCurrentReminder] =
-    useState<MemoryReminder | null>(null);
+  const [currentReminder, setCurrentReminder] = useState<MemoryReminder | null>(
+    null,
+  );
 
   // Track which entries have been shown today (by id)
   const shownIds = useRef(new Set<string>());
@@ -57,7 +58,8 @@ export function useMemoryReminders(
     const now = Date.now();
     if (reminderCount.current >= MAX_REMINDERS_PER_SESSION) return;
     if (now - lastReminderTime.current < REMINDER_COOLDOWN_MS) return;
-    if (shownIds.current.has(reminder.entry.id)) return;
+    // DEBUG: allow repeats — skip shownIds check
+    // if (shownIds.current.has(reminder.entry.id)) return;
 
     shownIds.current.add(reminder.entry.id);
     reminderCount.current += 1;
@@ -118,7 +120,8 @@ export function useMemoryReminders(
 
       // Find entries within radius, pick a random one
       const nearby = ownEntries.filter((entry) => {
-        if (shownIds.current.has(entry.id)) return false;
+        // DEBUG: allow repeats — skip shownIds check
+        // if (shownIds.current.has(entry.id)) return false;
         const dist = getDistanceMeters(
           userLocation.lat,
           userLocation.lng,
@@ -142,8 +145,10 @@ export function useMemoryReminders(
       if (daysAgo === 0) timeLabel = "earlier today";
       else if (daysAgo === 1) timeLabel = "yesterday";
       else if (daysAgo < 30) timeLabel = `${daysAgo} days ago`;
-      else if (daysAgo < 365) timeLabel = `${Math.floor(daysAgo / 30)} months ago`;
-      else timeLabel = `${Math.floor(daysAgo / 365)} year${Math.floor(daysAgo / 365) > 1 ? "s" : ""} ago`;
+      else if (daysAgo < 365)
+        timeLabel = `${Math.floor(daysAgo / 30)} months ago`;
+      else
+        timeLabel = `${Math.floor(daysAgo / 365)} year${Math.floor(daysAgo / 365) > 1 ? "s" : ""} ago`;
 
       tryShowReminder({
         entry: pick,

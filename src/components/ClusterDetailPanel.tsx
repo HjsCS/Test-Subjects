@@ -97,9 +97,9 @@ export default function ClusterDetailPanel({
         }}
       />
 
-      {/* Panel — highest z-index */}
+      {/* Panel — highest z-index, fixed 50vh height */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-[9999] max-h-[70vh] flex flex-col rounded-t-[24px] bg-white shadow-[0px_-10px_40px_rgba(0,0,0,0.12)] animate-slide-up"
+        className="fixed bottom-0 left-0 right-0 z-[9999] h-[50vh] flex flex-col rounded-t-[24px] bg-white shadow-[0px_-10px_40px_rgba(0,0,0,0.12)] animate-slide-up"
         onTouchMove={stopPropagation}
         onTouchStart={stopPropagation}
         onMouseDown={stopPropagation}
@@ -138,8 +138,8 @@ export default function ClusterDetailPanel({
               </button>
             </div>
 
-            {/* Category filter pills */}
-            <div className="flex gap-2.5 px-5 pb-4 overflow-x-auto scrollbar-hide">
+            {/* Category filter pills — shrink-0 prevents list from pushing over pills */}
+            <div className="flex gap-2.5 px-5 pb-4 overflow-x-auto scrollbar-hide shrink-0">
               <button
                 onClick={() => setActiveFilter("all")}
                 className={`flex-shrink-0 flex items-center justify-center gap-1 min-h-[36px] px-4 py-2 rounded-full text-[14px] font-medium leading-none transition-colors ${
@@ -171,7 +171,7 @@ export default function ClusterDetailPanel({
             </div>
 
             {/* Divider */}
-            <div className="h-px bg-[#f3f4f6] mx-5" />
+            <div className="h-px bg-[#f3f4f6] mx-5 shrink-0" />
 
             {/* Entry list — MoodDetailCard style */}
             <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-3 pb-28 space-y-3">

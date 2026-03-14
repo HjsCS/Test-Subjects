@@ -1,6 +1,4 @@
 import {
-  ArrowLeft,
-  Settings,
   Smile,
   MapPin,
   Heart,
@@ -12,6 +10,7 @@ import {
   ChevronRight,
   Calendar,
 } from "lucide-react";
+import SettingsButton from "@/components/SettingsButton";
 import { isSupabaseConfigured } from "@/lib/supabase/check";
 import type { MoodEntry } from "@/types/database";
 import type { EmotionCategory } from "@/types/database";
@@ -142,13 +141,9 @@ export default async function InsightsPage() {
     <div className="bg-[#fefbf6] min-h-screen pb-[120px]">
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-[50px] pb-4">
-        <div className="w-[40px] h-[40px] flex items-center justify-center">
-          <ArrowLeft size={24} className="text-[#364153]" />
-        </div>
+        <div className="w-[40px] h-[40px]" />
         <span className="text-[16px] font-medium text-[#101828]">Profile</span>
-        <div className="w-[40px] h-[40px] flex items-center justify-center">
-          <Settings size={20} className="text-[#364153]" />
-        </div>
+        <SettingsButton />
       </div>
 
       {/* Scrollable content */}

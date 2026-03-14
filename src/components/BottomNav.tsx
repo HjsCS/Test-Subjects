@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Plus, User, Users } from "lucide-react";
+import { Home, Plus, User } from "lucide-react";
 
 export default function BottomNav() {
   const pathname = usePathname();
 
   const isHome = pathname === "/map" || pathname === "/";
-  const isFriends = pathname === "/friends";
   const isProfile = pathname === "/insights";
 
   return (
@@ -39,24 +38,6 @@ export default function BottomNav() {
         <Plus size={22} className="text-[#1e2939]" />
         <span className="text-[10px] font-medium leading-none text-[#1e2939]">
           Mood
-        </span>
-      </Link>
-
-      {/* Friends */}
-      <Link
-        href="/friends"
-        className="flex flex-col items-center justify-center gap-1 w-[64px] h-[64px] rounded-[20px] bg-white shadow-[0px_20px_25px_0px_rgba(0,0,0,0.1),0px_8px_10px_0px_rgba(0,0,0,0.1)] transition-colors"
-      >
-        <Users
-          size={22}
-          className={isFriends ? "text-[#6baa96]" : "text-[#99a1af]"}
-        />
-        <span
-          className={`text-[10px] font-medium leading-none ${
-            isFriends ? "text-[#6baa96]" : "text-[#99a1af]"
-          }`}
-        >
-          Friends
         </span>
       </Link>
 

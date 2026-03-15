@@ -447,7 +447,7 @@ export default function InsightsPage() {
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] text-[#6a7282]">Mood Score</span>
                 <span className="text-[18px] font-medium text-[#6baa96]">
-                  {avgScore}/10
+                  {avgScore}/100
                 </span>
               </div>
             </div>

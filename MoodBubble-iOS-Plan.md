@@ -468,3 +468,97 @@ score 70-100: 大 (72pt)
 | 朋友通知 | Realtime + APNs | 替代轮询，省电实时 |
 | 位置提醒 | CoreLocation 地理围栏 | 系统级触发，App 杀掉也能工作 |
 | Watch | WatchConnectivity | 通过 iPhone 中转，Watch 省电 |
+| 多语言 | String Catalog (.xcstrings) | 跟随系统语言自动切换 |
+
+---
+
+## 十四、多语言国际化 (i18n)
+
+### 14.1 技术方案
+
+使用 Xcode 15+ 原生的 **String Catalog** (`.xcstrings`)，不需要第三方库。
+
+```
+系统语言检测流程：
+  用户设备语言 = 中文 → App 显示中文
+  用户设备语言 = English → App 显示英文
+  用户设备语言 = 其他 → 回退到英文（默认）
+```
+
+### 14.2 项目结构
+
+```
+MoodBubble/
+├── Localizable.xcstrings          # 主字符串目录（Xcode 自动管理）
+├── InfoPlist.xcstrings            # 权限描述的多语言
+└── 代码中直接用 String(localized:)
+```
+
+### 14.3 代码中使用方式
+
+```swift
+// SwiftUI 中直接写，Xcode 自动提取到 String Catalog
+Text("How are you feeling?")     // 英文键
+Text("Mood Trend")
+Text("Add Photo")
+
+// String Catalog 中对应：
+// "How are you feeling?" → 中文: "你现在感觉怎么样？"
+// "Mood Trend"           → 中文: "心情趋势"
+// "Add Photo"            → 中文: "添加照片"
+```
+
+```swift
+// 带参数的字符串
+Text("\(name) shared a mood")
+// 中文: "\(name) 分享了一条心情"
+
+Text("\(count) entries")
+// 中文: "\(count) 条记录"
+```
+
+### 14.4 需要翻译的内容分类
+
+| 分类 | 示例 (EN) | 示例 (中文) | 数量 |
+|------|-----------|-----------|------|
+| **导航/标签** | Home, Profile, Friends | 首页, 个人, 好友 | ~10 |
+| **地图页** | MoodBubble, All Map, Private Map | MoodBubble, 全部, 仅自己 | ~15 |
+| **创建 Mood** | New Mood, How does this feel?, Add Photo | 新心情, 你现在感觉怎么样？, 添加照片 | ~20 |
+| **分类名** | Social, Nature, Food & Dining... | 社交, 自然, 美食... | 10 |
+| **详情页** | Show on Map, Delete, Share with Friends | 在地图上查看, 删除, 分享给好友 | ~15 |
+| **社交** | Send Request, Accept, Friends | 发送请求, 接受, 好友 | ~15 |
+| **通知/提醒** | "xxx shared a mood", "You felt 😊 here" | "xxx 分享了一条心情", "你曾在这里感到 😊" | ~10 |
+| **Profile** | Mood Trend, Happiest Day, Improving | 心情趋势, 最开心的一天, 上升中 | ~15 |
+| **系统权限** | Location permission descriptions | 位置权限描述 | 4 |
+| **错误/空状态** | No entries, No friends yet | 暂无记录, 还没有好友 | ~10 |
+| **总计** | | | **~120 条** |
+
+### 14.5 Info.plist 权限描述翻译
+
+```
+// InfoPlist.xcstrings
+
+NSLocationWhenInUseUsageDescription:
+  EN: "MoodBubble uses your location to place mood bubbles on the map"
+  中文: "MoodBubble 使用你的位置在地图上放置心情气泡"
+
+NSLocationAlwaysUsageDescription:
+  EN: "MoodBubble reminds you of past moods when you revisit places"
+  中文: "当你重访某个地方时，MoodBubble 会提醒你曾经的心情"
+
+NSCameraUsageDescription:
+  EN: "Take a photo for your mood entry"
+  中文: "为你的心情记录拍摄照片"
+
+NSPhotoLibraryUsageDescription:
+  EN: "Choose a photo from your library for your mood entry"
+  中文: "从相册选择照片作为心情记录"
+```
+
+### 14.6 注意事项
+
+- **分类名 (category)** 存数据库的是英文 key（`social`, `nature`），显示时走本地化
+- **用户笔记 (note)** 不翻译——用户写什么存什么
+- **emoji** 全球通用，不需要翻译
+- **日期格式** 用 `Date.FormatStyle` 自动适配地区（中文显示 "2026年3月16日"，英文 "Mar 16, 2026"）
+- **后续扩展语言** 只需在 String Catalog 添加新语言列，不改代码
